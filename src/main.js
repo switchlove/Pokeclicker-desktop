@@ -42,7 +42,7 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setTitle('PokéClicker');
+  mainWindow.setTitle('PokéClicker ACSRQ');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
   if (fs.existsSync(`${dataDir}/pokeclicker-acsrq/docs/index.html`)) {
