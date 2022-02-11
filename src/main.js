@@ -42,7 +42,7 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setTitle('PokéClicker ACSRQ - Beta');
+  mainWindow.setTitle('PokéClicker ACSRQ Beta');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
   if (fs.existsSync(`${dataDir}/pokeclicker-acsrq-beta/docs/index.html`)) {
@@ -75,7 +75,7 @@ function createSecondaryWindow() {
   });
 
   newWindow.setMenuBarVisibility(false);
-  newWindow.setTitle('PokéClicker ACSRQ - Beta (alternate)');
+  newWindow.setTitle('PokéClicker ACSRQ Beta (alternate)');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
   if (fs.existsSync(`${dataDir}/pokeclicker-acsrq-beta/docs/index.html`)) {
