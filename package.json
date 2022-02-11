@@ -1,22 +1,22 @@
 {
-  "name": "pokeclicker-desktop",
+  "name": "pokeclicker-desktop-acsrq",
   "version": "1.1.0",
-  "description": "PokeClicker Desktop",
+  "description": "PokeClicker Desktop - ACSRQ Beta",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RedSparr0w/Pokeclicker-desktop.git"
+    "url": "https://github.com/switchlove/Pokeclicker-desktop.git"
   },
   "main": "src/main.js",
   "scripts": {
     "start": "electron ./",
     "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
-    "dist:32": "npm run restore-src && electron-builder --ia32",
-    "dist:64": "npm run restore-src && electron-builder --ia64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
+    "dist:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
+    "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
     "win": "electron-builder --windows portable",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
-    "name": "RedSparr0w",
+    "name": "SwitchLove",
     "email": "desktop@pokeclicker.com"
   },
   "license": "ISC",
@@ -30,7 +30,7 @@
     "electron-builder": "^22.11.7"
   },
   "build": {
-    "productName": "PokéClicker",
+    "productName": "PokéClicker ACSRQ",
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
@@ -43,6 +43,6 @@
       "icon": "icon_512x512.png"
     },
     "deb": {},
-    "appId": "pokeclicker.desktop"
+    "appId": "pokeclicker.desktop.acsrq"
   }
 }
