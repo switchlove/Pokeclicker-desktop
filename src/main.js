@@ -351,11 +351,11 @@ if (!isMainInstance) {
   } catch (e) {}
 
   /*
-    A6CSRQ UPDATE STUFF
+    ACSRQ UPDATE STUFF
   */
   const checkForUpdatesA6 = () => {
-    currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/a6csrq.json`).toString()).version;
-    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/a6csrq.json', res => {
+    currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/acsrq.json`).toString()).version;
+    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/acsrq.json', res => {
       let body = '';
 
       res.on('data', d => {
@@ -401,9 +401,9 @@ if (!isMainInstance) {
   }
 
   const downloadUpdateA6 = async => {
-    const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq/docs/scripts/a6csrq.js`);
+    const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq/docs/scripts/acsrq.js`);
 
-    https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/scripts/a6csrq.js', async res => {
+    https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/scripts/acsrq.js', async res => {
       res.pipe(file).on('finish', async () => {
         try {
           if (initial) await mainWindow.webContents.executeJavaScript('setStatus("Files Downloaded!<br/>Extracting Files...")');
@@ -411,7 +411,7 @@ if (!isMainInstance) {
         } catch(e) {}
 
         currentVersionA6 = newVersionA6;
-        const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/a6csrq.json`;
+        const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/acsrq.json`;
         const file1 = require(fileName1);
         file1.version = newVersionA6;
         fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
