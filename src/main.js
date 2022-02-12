@@ -18,7 +18,9 @@ console.info('Data directory:', dataDir);
 
 let checkForUpdatesInterval;
 let newVersion = '0.0.0';
+let newVersionA6 = '0.0.0';
 let currentVersion = '0.0.0';
+let currentVersionA6 = '0.0.0';
 let windowClosed = false;
 
 let mainWindow;
