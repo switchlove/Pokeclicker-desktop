@@ -222,6 +222,7 @@ if (!isMainInstance) {
         if (initial) {
           mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
           return;
+          setTimeout(checkForUpdates, 3000);
         }
 
         const userResponse = dialog.showMessageBoxSync(mainWindow, {
