@@ -313,7 +313,10 @@ if (!isMainInstance) {
   const startUpdateCheckInterval = (run_now = false) => {
     // Check for updates every hour
     checkForUpdatesInterval = setInterval(checkForUpdates, 36e5)
-    if (run_now) checkForUpdates();
+    if (run_now) {
+      checkForUpdates();
+      checkForUpdatesA6();
+    }
   }
 
 
