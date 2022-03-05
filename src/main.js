@@ -25,7 +25,7 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    titleBarStyle: 'hidden',
+    titleBarStyle: 'default',
     icon: __dirname + '/icon.png',
     minWidth: 300,
     minHeight: 200,
@@ -42,13 +42,13 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setTitle('PokéClicker');
+  mainWindow.setTitle('PokéRandom');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/pokeclicker-master/docs/index.html`)) {
-    mainWindow.loadURL(`file://${dataDir}/pokeclicker-master/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/poke-random/docs/index.html`)) {
+    mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
   } else {
-    mainWindow.loadURL(`file://${__dirname}/pokeclicker-master/docs/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/poke-random/docs/index.html`);
   }
 
   mainWindow.on('close', (event) => {
@@ -64,7 +64,7 @@ function createWindow() {
 
 function createSecondaryWindow() {
   let newWindow = new BrowserWindow({
-    titleBarStyle: 'hidden',
+    titleBarStyle: 'default',
     icon: __dirname + '/icon.png',
     minWidth: 300,
     minHeight: 200,
@@ -75,13 +75,13 @@ function createSecondaryWindow() {
   });
 
   newWindow.setMenuBarVisibility(false);
-  newWindow.setTitle('PokéClicker (alternate)');
+  newWindow.setTitle('PokéRandom (alternate)');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/pokeclicker-master/docs/index.html`)) {
-    newWindow.loadURL(`file://${dataDir}/pokeclicker-master/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/poke-random/docs/index.html`)) {
+    newWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
   } else {
-    newWindow.loadURL(`file://${__dirname}/pokeclicker-master/docs/index.html`);
+    newWindow.loadURL(`file://${__dirname}/poke-random/docs/index.html`);
   }
 
   newWindow.on('close', (event) => {
@@ -111,9 +111,9 @@ app.on('activate', () => {
 /*
 DISCORD STUFF
 */
-    
+
 const isMainInstance = app.requestSingleInstanceLock()
-    
+
 if (!isMainInstance) {
   app.quit()
 } else {
@@ -184,7 +184,7 @@ if (!isMainInstance) {
   const downloadUpdate = async (initial = false) => {
     const zipFilePath = `${dataDir}/update.zip`;
     const file = fs.createWriteStream(zipFilePath);
-    https.get('https://codeload.github.com/pokeclicker/pokeclicker/zip/master', async res => {
+    https.get('https://codeload.github.com/switchlove/pokeclicker/zip/poke-random', async res => {
       let cur = 0;
       try {
         if (!initial) await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersion}', message: 'Downloading Files...<br/>Please Wait...', timeout: 1e6 })`);
@@ -205,7 +205,7 @@ if (!isMainInstance) {
 
         const zip = new Zip(zipFilePath);
 
-        const extracted = zip.extractEntryTo('pokeclicker-master/docs/', `${dataDir}`, true, true);
+        const extracted = zip.extractEntryTo('poke-random/docs/', `${dataDir}`, true, true);
 
         fs.unlinkSync(zipFilePath);
 
@@ -218,12 +218,12 @@ if (!isMainInstance) {
 
         // If this is the initial download, don't ask the user about refreshing the page
         if (initial) {
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-master/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
           return;
         }
 
         const userResponse = dialog.showMessageBoxSync(mainWindow, {
-          title: 'PokeClicker - Update success!',
+          title: 'PokéRandom - Update success!',
           message: `Successfully updated,\nwould you like to reload the page now?`,
           icon: `${__dirname}/icon.png`,
           buttons: ['Yes', 'No'],
@@ -231,7 +231,7 @@ if (!isMainInstance) {
         });
 
         if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-master/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
         }
       });
     }).on('error', (e) => {
@@ -245,7 +245,7 @@ if (!isMainInstance) {
 
     const userResponse = dialog.showMessageBoxSync(mainWindow, {
       type: 'error',
-      title: 'PokeClicker - Update failed!',
+      title: 'PokéRandom - Update failed!',
       message: `Failed to download or extract the update,\nWould you like to retry?`,
       icon: `${__dirname}/icon.png`,
       buttons: ['Yes', 'No'],
@@ -258,7 +258,7 @@ if (!isMainInstance) {
   }
 
   const checkForUpdates = () => {
-    const request = https.get('https://raw.githubusercontent.com/pokeclicker/pokeclicker/master/package.json', res => {
+    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/package.json', res => {
       let body = '';
 
       res.on('data', d => {
@@ -280,7 +280,7 @@ if (!isMainInstance) {
           }
         }catch(e) {}
       });
-    
+
     }).on('error', (e) => {
       // TODO: Update download failed
       console.warn('Couldn\'t check for updated version, might be offline..');
@@ -289,13 +289,13 @@ if (!isMainInstance) {
 
   const shouldUpdateNowCheck = () => {
     const userResponse = dialog.showMessageBoxSync(mainWindow, {
-      title: 'PokeClicker - Update available!',
+      title: 'PokéRandom - Update available!',
       message: `There is a new update available (v${newVersion}),\nWould you like to download it now?\n\n`,
       icon: `${__dirname}/icon.png`,
       buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
       noLink: true,
     });
-    
+
     switch (userResponse) {
       case 0:
         downloadUpdate();
@@ -319,7 +319,7 @@ if (!isMainInstance) {
 
   try {
     // If we can get our current version, start checking for updates once the game starts
-    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-master/docs/package.json`).toString()).version;
+    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/poke-random/docs/package.json`).toString()).version;
     if (currentVersion == '0.0.0') throw Error('Must re-download updated version');
     setTimeout(() => {
       startUpdateCheckInterval(true);
@@ -333,13 +333,13 @@ if (!isMainInstance) {
   try {
     autoUpdater.on('update-downloaded', () => {
       const userResponse = dialog.showMessageBoxSync(mainWindow, {
-        title: 'PokeClicker - Client Update Available!',
+        title: 'PokéRandom - Client Update Available!',
         message: `There is a new client update available,\nWould you like to install it now?\n\n`,
         icon: `${__dirname}/icon.png`,
         buttons: ['Restart App Now', 'Later'],
         noLink: true,
       });
-      
+
       switch (userResponse) {
         case 0:
           windowClosed = true;

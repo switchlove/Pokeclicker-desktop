@@ -1,7 +1,7 @@
 {
-  "name": "pokeclicker-desktop",
+  "name": "pokerandom-desktop",
   "version": "1.1.0",
-  "description": "PokeClicker Desktop",
+  "description": "PokéRandom Desktop",
   "repository": {
     "type": "git",
     "url": "https://github.com/RedSparr0w/Pokeclicker-desktop.git"
@@ -9,7 +9,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron ./",
-    "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
+    "restore-src": "git restore --source=HEAD --staged --worktree -- src/poke-random && git clean -x -f -- src/poke-random",
     "dist:32": "npm run restore-src && electron-builder --ia32",
     "dist:64": "npm run restore-src && electron-builder --ia64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
     "win": "electron-builder --windows portable",
@@ -30,7 +30,7 @@
     "electron-builder": "^22.11.7"
   },
   "build": {
-    "productName": "PokéClicker",
+    "productName": "PokéRandom",
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
@@ -43,6 +43,6 @@
       "icon": "icon_512x512.png"
     },
     "deb": {},
-    "appId": "pokeclicker.desktop"
+    "appId": "pokerandom.desktop"
   }
 }
