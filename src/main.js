@@ -45,10 +45,10 @@ function createWindow() {
   mainWindow.setTitle('PokéRandom');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/poke-random/docs/index.html`)) {
-    mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/pokeclicker-poke-random/docs/index.html`)) {
+    mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
   } else {
-    mainWindow.loadURL(`file://${__dirname}/poke-random/docs/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/pokeclicker-poke-random/docs/index.html`);
   }
 
   mainWindow.on('close', (event) => {
@@ -78,10 +78,10 @@ function createSecondaryWindow() {
   newWindow.setTitle('PokéRandom (alternate)');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/poke-random/docs/index.html`)) {
-    newWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/pokeclicker-poke-random/docs/index.html`)) {
+    newWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
   } else {
-    newWindow.loadURL(`file://${__dirname}/poke-random/docs/index.html`);
+    newWindow.loadURL(`file://${__dirname}/pokeclicker-poke-random/docs/index.html`);
   }
 
   newWindow.on('close', (event) => {
@@ -205,7 +205,7 @@ if (!isMainInstance) {
 
         const zip = new Zip(zipFilePath);
 
-        const extracted = zip.extractEntryTo('poke-random/docs/', `${dataDir}`, true, true);
+        const extracted = zip.extractEntryTo('pokeclicker-poke-random/docs/', `${dataDir}`, true, true);
 
         fs.unlinkSync(zipFilePath);
 
@@ -218,7 +218,7 @@ if (!isMainInstance) {
 
         // If this is the initial download, don't ask the user about refreshing the page
         if (initial) {
-          mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
           return;
         }
 
@@ -231,7 +231,7 @@ if (!isMainInstance) {
         });
 
         if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/poke-random/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
         }
       });
     }).on('error', (e) => {
@@ -319,7 +319,7 @@ if (!isMainInstance) {
 
   try {
     // If we can get our current version, start checking for updates once the game starts
-    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/poke-random/docs/package.json`).toString()).version;
+    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-poke-random/docs/package.json`).toString()).version;
     if (currentVersion == '0.0.0') throw Error('Must re-download updated version');
     setTimeout(() => {
       startUpdateCheckInterval(true);
