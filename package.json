@@ -4,7 +4,7 @@
   "description": "PokéRandom Desktop",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RedSparr0w/Pokeclicker-desktop.git"
+    "url": "https://github.com/switchlove/Pokeclicker-desktop.git"
   },
   "main": "src/main.js",
   "scripts": {
@@ -12,12 +12,14 @@
     "restore-src": "git restore --source=HEAD --staged --worktree -- src/poke-random && git clean -x -f -- src/poke-random",
     "dist:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
     "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
+    "pub:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext} -p always",
+    "pub:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext} -p always",
     "win": "electron-builder --windows portable",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
   },
   "author": {
     "name": "DevSwitch",
-    "email": "desktop@pokeclicker.com"
+    "email": "dev@switchlove.app"
   },
   "license": "ISC",
   "dependencies": {
@@ -36,7 +38,8 @@
       "allowToChangeInstallationDirectory": true
     },
     "win": {
-      "requestedExecutionLevel": "highestAvailable"
+      "requestedExecutionLevel": "highestAvailable",
+      "publish": ["github"]
     },
     "linux": {
       "category": "Game",
