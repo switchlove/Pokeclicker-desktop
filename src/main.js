@@ -320,7 +320,7 @@ if (!isMainInstance) {
     // Check for updates every hour
     checkForUpdatesInterval = setInterval(checkForUpdates, 36e5)
     checkForUpdatesIntervalA6 = setInterval(checkForUpdatesA6, 36e5)
-    checkForUpdatesIntervalRando = setInterval(checkForUpdatesR, 36e5)
+    checkForUpdatesIntervalR = setInterval(checkForUpdatesR, 36e5)
     if (run_now) checkForUpdates();
   }
 
