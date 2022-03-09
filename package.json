@@ -39,7 +39,11 @@
     },
     "win": {
       "requestedExecutionLevel": "highestAvailable",
-      "publish": ["github"]
+      "publish": [{
+          "provider": "github",
+          "owner": "switchlove",
+          "repo": "Pokeclicker-desktop"
+      }],
     },
     "linux": {
       "category": "Game",
