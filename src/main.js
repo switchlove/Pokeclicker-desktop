@@ -17,6 +17,8 @@ const dataDir =  (electron.app || electron.remote.app).getPath('userData');
 console.info('Data directory:', dataDir);
 
 let checkForUpdatesInterval;
+let checkForUpdatesIntervalA6;
+let checkForUpdatesIntervalR;
 let newVersion = '0.0.0';
 let newVersionA6 = '0.0.0';
 let newVersionR = '0.0.0';
@@ -317,6 +319,8 @@ if (!isMainInstance) {
   const startUpdateCheckInterval = (run_now = false) => {
     // Check for updates every hour
     checkForUpdatesInterval = setInterval(checkForUpdates, 36e5)
+    checkForUpdatesIntervalA6 = setInterval(checkForUpdatesA6, 36e5)
+    checkForUpdatesIntervalRando = setInterval(checkForUpdatesR, 36e5)
     if (run_now) checkForUpdates();
   }
 

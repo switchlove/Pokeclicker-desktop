@@ -1,6 +1,6 @@
 {
   "name": "pokerandom-desktop",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "PokéRandom Desktop",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "pub:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext} -p always",
     "pub:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext} -p always",
     "win": "electron-builder --windows portable",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
     "name": "DevSwitch",
