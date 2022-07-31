@@ -19,6 +19,8 @@ console.info('Data directory:', dataDir);
 let checkForUpdatesInterval;
 let newVersion = '0.0.0';
 let newVersionA6 = '0.0.0';
+let newFilesA6 = [];
+let newDownloaded;
 let currentVersion = '0.0.0';
 let currentVersionA6 = '0.0.0';
 let windowClosed = false;
@@ -357,88 +359,95 @@ if (!isMainInstance) {
   } catch (e) {}
 
   /*
-    ACSRQ UPDATE STUFF
+  ACSRQ UPDATE STUFF
   */
   const checkForUpdatesA6 = () => {
-    currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/acsrq.json`).toString()).version;
-    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/acsrq.json', res => {
-      let body = '';
+      currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`).toString()).version;
+      const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/acsrq.json', res => {
+          let body = '';
 
-      res.on('data', d => {
-        body += d;
-      });
+          res.on('data', d => {
+              body += d;
+          });
 
-      res.on('end', () => {
-        let data = {version:'0.0.0'};
-        try {
-          data = JSON.parse(body);
-          newVersionA6 = data.version;
-          const newVersionAvailable = data.version.localeCompare(currentVersionA6, undefined, { numeric: true }) === 1
+          res.on('end', () => {
+              let data = {version:'0.0.0'};
+              try {
+                  data = JSON.parse(body);
+                  newVersionA6 = data.version;
+                  newFilesA6 = data.files;
+                  const newVersionAvailable = data.version.localeCompare(currentVersionA6, undefined, { numeric: true }) === 1
+                  if (newVersionAvailable) {
+                      const userResponse = dialog.showMessageBoxSync(mainWindow, {
+                          title: 'ACSRQ - Script update available!',
+                          message: `There is a new script update available (v${newVersionA6}),\nWould you like to download it now?\n\n`,
+                          icon: `${__dirname}/icon.png`,
+                          buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
+                          noLink: true,
+                      });
 
-          if (newVersionAvailable) {
-            const userResponse = dialog.showMessageBoxSync(mainWindow, {
-              title: 'ACSRQ - Script update available!',
-              message: `There is a new script update available (v${newVersionA6}),\nWould you like to download it now?\n\n`,
-              icon: `${__dirname}/icon.png`,
-              buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
-              noLink: true,
-            });
-
-            switch (userResponse) {
-              case 0:
-                downloadUpdateA6();
-                break;
-              case 1:
-                // Check again in 1 hour
-                setTimeout(checkForUpdatesA6, 36e5)
-                break;
-              case 2:
-                console.info('Update check disabled, stop checking for updates');
-                break;
-            }
-          }
-        } catch(e) {}
-      });
+                      switch (userResponse) {
+                          case 0:
+                              newDownloaded = 0;
+                              downloadUpdateA6(newFilesA6);
+                              break;
+                          case 1:
+                              // Check again in 1 hour
+                              setTimeout(checkForUpdatesA6, 36e5)
+                              break;
+                          case 2:
+                              console.info('Update check disabled, stop checking for updates');
+                              break;
+                      }
+                  }
+              } catch(e) {}
+          });
 
       }).on('error', (e) => {
-      // TODO: Update download failed
-      console.warn('Couldn\'t check for updated version, might be offline..');
-    });
+          // TODO: Update download failed
+          console.warn('Couldn\'t check for updated version, might be offline..');
+      });
   }
 
-  const downloadUpdateA6 = async => {
-    const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq/docs/scripts/acsrq.js`);
+  async function downloadCheckA6() {
+      newDownloaded++;
+      if (newDownloaded === 3) downloadCompleteA6();
+  }
 
-    https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/scripts/acsrq.js', async res => {
-      res.pipe(file).on('finish', async () => {
-        try {
-          if (initial) await mainWindow.webContents.executeJavaScript('setStatus("Files Downloaded!<br/>Extracting Files...")');
-          else await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersionA6}', message: 'Files Downloaded!<br/>Extracting Files...', timeout: 2e4 })`);
-        } catch(e) {}
+  async function downloadUpdateA6(newFilesA6) {
+      const files = newFilesA6;
+      for (const x of files) {
+          const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq-beta/docs/${x}`);
+          https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/${x}`, async res => {
+              res.pipe(file).on('finish', async () => {
+                  downloadCheckA6();
+              });
+          }).on('error', (e) => {
+            return downloadUpdateFailed();
+          });
+      }
+  }
 
-        currentVersionA6 = newVersionA6;
-        const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/acsrq.json`;
-        const file1 = require(fileName1);
-        file1.version = newVersionA6;
-        fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
+  async function downloadCompleteA6() {
+      currentVersionA6 = newVersionA6;
+      const fileName1 = `${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`;
+      const file1 = require(fileName1);
+      file1.version = newVersionA6;
+      fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
           if (err) return console.log(err);
-        });
+      });
 
-        const userResponse = dialog.showMessageBoxSync(mainWindow, {
+      const userResponse = dialog.showMessageBoxSync(mainWindow, {
           title: 'ACSRQ - Update success!',
           message: `Successfully updated,\nwould you like to reload the page now?`,
           icon: `${__dirname}/icon.png`,
           buttons: ['Yes', 'No'],
           noLink: true,
-        });
-
-        if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
-        }
       });
-    }).on('error', (e) => {
-      return downloadUpdateFailed();
-    });
+
+      if (userResponse == 0){
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
+      }
   }
 
 }
