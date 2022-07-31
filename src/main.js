@@ -362,8 +362,8 @@ if (!isMainInstance) {
   ACSRQ UPDATE STUFF
   */
   const checkForUpdatesA6 = () => {
-      currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`).toString()).version;
-      const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/acsrq.json', res => {
+      currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/acsrq.json`).toString()).version;
+      const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/acsrq.json', res => {
           let body = '';
 
           res.on('data', d => {
@@ -417,8 +417,8 @@ if (!isMainInstance) {
   async function downloadUpdateA6(newFilesA6) {
       const files = newFilesA6;
       for (const x of files) {
-          const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq-beta/docs/${x}`);
-          https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/${x}`, async res => {
+          const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq/docs/${x}`);
+          https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/${x}`, async res => {
               res.pipe(file).on('finish', async () => {
                   downloadCheckA6();
               });
@@ -430,7 +430,7 @@ if (!isMainInstance) {
 
   async function downloadCompleteA6() {
       currentVersionA6 = newVersionA6;
-      const fileName1 = `${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`;
+      const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/acsrq.json`;
       const file1 = require(fileName1);
       file1.version = newVersionA6;
       fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
@@ -446,7 +446,7 @@ if (!isMainInstance) {
       });
 
       if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
       }
   }
 
