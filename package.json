@@ -10,6 +10,8 @@
   "scripts": {
     "start": "electron ./",
     "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
+    "dist:tux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac -c.artifactName=${productName}-setup-${version}.${ext}",
     "dist:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
     "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
     "pub:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext} -p always",
@@ -32,6 +34,7 @@
     "electron-builder": "^22.11.7"
   },
   "build": {
+    "appId": "pokeclicker.desktop.acsrq",
     "productName": "PokéClicker ACSRQ",
     "nsis": {
       "oneClick": false,
@@ -39,17 +42,18 @@
     },
     "win": {
       "requestedExecutionLevel": "highestAvailable",
-      "publish": [{
+      "publish": [
+        {
           "provider": "github",
           "owner": "switchlove",
           "repo": "Pokeclicker-desktop"
-      }]
+        }
+      ]
     },
     "linux": {
       "category": "Game",
       "icon": "icon_512x512.png"
     },
-    "deb": {},
-    "appId": "pokeclicker.desktop.acsrq"
+    "deb": {}
   }
 }
