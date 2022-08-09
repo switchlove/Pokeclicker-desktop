@@ -433,6 +433,7 @@ if (!isMainInstance) {
       const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/acsrq.json`;
       const file1 = require(fileName1);
       file1.version = newVersionA6;
+      file1.files = newFilesA6;
       fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
           if (err) return console.log(err);
       });
