@@ -27,6 +27,11 @@ let windowClosed = false;
 
 let mainWindow;
 
+const protocolClient = 'pokeclicker-desktop-acsrq_pokeclicker-desktop-acsrq.desktop';
+if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
+	app.setAsDefaultProtocolClient(protocolClient, process.execPath);
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     titleBarStyle: 'default',
@@ -127,7 +132,6 @@ if (!isMainInstance) {
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
     }
-
     createSecondaryWindow();
   })
 
@@ -324,7 +328,6 @@ if (!isMainInstance) {
     }
   }
 
-
   try {
     // If we can get our current version, start checking for updates once the game starts
     currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/package.json`).toString()).version;
@@ -447,7 +450,12 @@ if (!isMainInstance) {
       });
 
       if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
+          await mainWindow.webContents.executeJavaScript(`Notifier.notify({
+              title: 'ACSRQ v${newVersion}',
+              message: 'Now reloading...<br/>Please Wait...',
+              timeout: 2000
+          })`);
+          setTimeout(function(){ mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`) }, 2000);
       }
   }
 
