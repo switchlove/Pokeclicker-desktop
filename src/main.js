@@ -17,11 +17,14 @@ const dataDir =  (electron.app || electron.remote.app).getPath('userData');
 console.info('Data directory:', dataDir);
 
 let checkForUpdatesInterval;
-let checkForUpdatesIntervalA6;
-let checkForUpdatesIntervalR;
 let newVersion = '0.0.0';
 let newVersionA6 = '0.0.0';
 let newVersionR = '0.0.0';
+let newFilesA6 = [];
+let newFilesR = [];
+let newDownloaded;
+let newDownloadedR;
+
 let currentVersion = '0.0.0';
 let currentVersionA6 = '0.0.0';
 let currentVersionR = '0.0.0';
@@ -29,6 +32,10 @@ let windowClosed = false;
 
 let mainWindow;
 
+const protocolClient = 'pokerandom.desktop_pokerandom.desktop';
+if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
+	app.setAsDefaultProtocolClient(protocolClient, process.execPath);
+}
 function createWindow() {
     mainWindow = new BrowserWindow({
         titleBarStyle: 'default',
@@ -226,6 +233,7 @@ if (!isMainInstance) {
                 if (initial) {
                     mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
                     return;
+					setTimeout(checkForUpdates, 3000);
                 }
 
                 const userResponse = dialog.showMessageBoxSync(mainWindow, {
@@ -319,15 +327,12 @@ if (!isMainInstance) {
     const startUpdateCheckInterval = (run_now = false) => {
         // Check for updates every hour
         checkForUpdatesInterval = setInterval(checkForUpdates, 36e5)
-        checkForUpdatesIntervalA6 = setInterval(checkForUpdatesA6, 36e5)
-        checkForUpdatesIntervalR = setInterval(checkForUpdatesR, 36e5)
         if (run_now) {
             checkForUpdates();
             checkForUpdatesA6();
             checkForUpdatesR();
         }
     }
-
 
     try {
         // If we can get our current version, start checking for updates once the game starts
@@ -365,7 +370,7 @@ if (!isMainInstance) {
     /*
     ACSRQ UPDATE STUFF
     */
-    const checkForUpdatesA6 = () => {
+	const checkForUpdatesA6 = () => {
         currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-poke-random/docs/acsrq.json`).toString()).version;
         const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/acsrq.json', res => {
             let body = '';
@@ -379,9 +384,9 @@ if (!isMainInstance) {
                 try {
                     data = JSON.parse(body);
                     newVersionA6 = data.version;
-                    const newVersionAvailable = data.version.localeCompare(currentVersionA6, undefined, { numeric: true }) === 1
-
-                    if (newVersionAvailable) {
+                    newFilesA6 = data.files;
+                    const newVersionAvailableA6 = data.version.localeCompare(currentVersionA6, undefined, { numeric: true }) === 1
+                    if (newVersionAvailableA6) {
                         const userResponse = dialog.showMessageBoxSync(mainWindow, {
                             title: 'ACSRQ - Script update available!',
                             message: `There is a new script update available (v${newVersionA6}),\nWould you like to download it now?\n\n`,
@@ -392,64 +397,78 @@ if (!isMainInstance) {
 
                         switch (userResponse) {
                             case 0:
-                            downloadUpdateA6();
-                            break;
+                                newDownloaded = 0;
+                                downloadUpdateA6(newFilesA6);
+                                break;
                             case 1:
-                            // Check again in 1 hour
-                            setTimeout(checkForUpdatesA6, 36e5)
-                            break;
+                                // Check again in 1 hour
+                                setTimeout(checkForUpdatesA6, 36e5)
+                                break;
                             case 2:
-                            console.info('Update check disabled, stop checking for updates');
-                            break;
+                                console.info('Update check disabled, stop checking for updates');
+                                break;
                         }
                     }
                 } catch(e) {}
             });
+
         }).on('error', (e) => {
             // TODO: Update download failed
             console.warn('Couldn\'t check for updated version, might be offline..');
         });
     }
 
-    const downloadUpdateA6 = async => {
-        const file = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/scripts/acsrq.js`);
+    async function downloadCheckA6() {
+        newDownloaded++;
+        if (newDownloaded === 3) downloadCompleteA6();
+    }
 
-        https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/scripts/acsrq.js', async res => {
-            res.pipe(file).on('finish', async () => {
-                try {
-                    if (initial) await mainWindow.webContents.executeJavaScript('setStatus("Files Downloaded!<br/>Extracting Files...")');
-                    else await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersionA6}', message: 'Files Downloaded!<br/>Extracting Files...', timeout: 2e4 })`);
-                } catch(e) {}
-
-                currentVersionA6 = newVersionA6;
-                const fileName1 = `${dataDir}/pokeclicker-poke-random/docs/acsrq.json`;
-                const file1 = require(fileName1);
-                file1.version = newVersionA6;
-                fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
-                    if (err) return console.log(err);
+    async function downloadUpdateA6(newFilesA6) {
+        const files = newFilesA6;
+        for (const x of files) {
+            const file = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/${x}`);
+            https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/${x}`, async res => {
+                res.pipe(file).on('finish', async () => {
+                    downloadCheckA6();
                 });
-
-                const userResponse = dialog.showMessageBoxSync(mainWindow, {
-                    title: 'ACSRQ - Update success!',
-                    message: `Successfully updated,\nwould you like to reload the page now?`,
-                    icon: `${__dirname}/icon.png`,
-                    buttons: ['Yes', 'No'],
-                    noLink: true,
-                });
-
-                if (userResponse == 0){
-                    mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
-                }
+            }).on('error', (e) => {
+              return downloadUpdateFailed();
             });
-        }).on('error', (e) => {
-            return downloadUpdateFailed();
+        }
+    }
+
+    async function downloadCompleteA6() {
+        currentVersionA6 = newVersionA6;
+        const fileName1 = `${dataDir}/pokeclicker-poke-random/docs/acsrq.json`;
+        const file1 = require(fileName1);
+        file1.version = newVersionA6;
+        file1.files = newFilesA6;
+        fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
+            if (err) return console.log(err);
         });
+
+        const userResponse = dialog.showMessageBoxSync(mainWindow, {
+            title: 'ACSRQ - Update success!',
+            message: `Successfully updated,\nwould you like to reload the page now?`,
+            icon: `${__dirname}/icon.png`,
+            buttons: ['Yes', 'No'],
+            noLink: true,
+        });
+
+        if (userResponse == 0){
+            await mainWindow.webContents.executeJavaScript(`Notifier.notify({
+                title: 'ACSRQ v${newVersionA6}',
+                message: 'Now reloading...<br/>Please Wait...',
+                timeout: 2000
+            })`);
+            setTimeout(function(){ mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`) }, 2000);
+        }
     }
 
     /*
     PokeRandon UPDATE STUFF
     */
-    const checkForUpdatesR = () => {
+	const checkForUpdatesR = () => {
         currentVersionR = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-poke-random/docs/randomizer.json`).toString()).version;
         const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/randomizer.json', res => {
             let body = '';
@@ -463,12 +482,12 @@ if (!isMainInstance) {
                 try {
                     data = JSON.parse(body);
                     newVersionR = data.version;
-                    const newVersionAvailable = data.version.localeCompare(currentVersionR, undefined, { numeric: true }) === 1
-
-                    if (newVersionAvailable) {
+                    newFilesR = data.files;
+                    const newVersionAvailableR = data.version.localeCompare(currentVersionR, undefined, { numeric: true }) === 1
+                    if (newVersionAvailableR) {
                         const userResponse = dialog.showMessageBoxSync(mainWindow, {
                             title: 'PokéRandom - Update available!',
-                            message: `There is a new PokéRandom update available (v${newVersionR}),\nWould you like to download it now?\n\n`,
+                            message: `There is a new script update available (v${newVersionR}),\nWould you like to download it now?\n\n`,
                             icon: `${__dirname}/icon.png`,
                             buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
                             noLink: true,
@@ -476,15 +495,16 @@ if (!isMainInstance) {
 
                         switch (userResponse) {
                             case 0:
-                            downloadUpdateR();
-                            break;
+                                newDownloadedR = 0;
+                                downloadUpdateR(newFilesR);
+                                break;
                             case 1:
-                            // Check again in 1 hour
-                            setTimeout(checkForUpdatesR, 36e5)
-                            break;
+                                // Check again in 1 hour
+                                setTimeout(checkForUpdatesR, 36e5)
+                                break;
                             case 2:
-                            console.info('Update check disabled, stop checking for updates');
-                            break;
+                                console.info('Update check disabled, stop checking for updates');
+                                break;
                         }
                     }
                 } catch(e) {}
@@ -495,54 +515,50 @@ if (!isMainInstance) {
         });
     }
 
-    const downloadUpdateR = async => {
-        console.log('Start download!');
-        const file1 = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/scripts/script.min.js`);
-        https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/scripts/script.min.js', async res => {
-            res.pipe(file1).on('finish', async () => {
-                console.log('File 1/3 done!');
-                await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] PokéRandom v${newVersionR}', message: '1/3  Files Downloaded!', timeout: 2500 })`);
-                const file2 = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/scripts/modules.min.js`);
-                https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/scripts/modules.min.js', async res => {
-                    res.pipe(file2).on('finish', async () => {
-                        console.log('File 2/3 done!');
-                        await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] PokéRandom v${newVersionR}', message: '2/3  Files Downloaded!', timeout: 2500 })`);
-                        const file3 = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/scripts/randomizer.js`);
-                        https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/scripts/randomizer.js', async res => {
-                            res.pipe(file3).on('finish', async () => {
-                                console.log('File 3/3 done!');
-                                await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] PokéRandom v${newVersionR}', message: '3/3  Files Downloaded!', timeout: 2500 })`);
+    async function downloadCheckR() {
+        newDownloadedR++;
+        if (newDownloadedR === 3) downloadCompleteR();
+    }
 
-                                currentVersionR = newVersionR;
-                                const fileName1 = `${dataDir}/pokeclicker-poke-random/docs/randomizer.json`;
-                                const file1 = require(fileName1);
-                                file1.version = newVersionR;
-                                fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
-                                  if (err) return console.log(err);
-                                });
-
-                                const userResponse = dialog.showMessageBoxSync(mainWindow, {
-                                  title: 'PokéRandom - Update success!',
-                                  message: `Successfully updated,\nwould you like to reload the page now?`,
-                                  icon: `${__dirname}/icon.png`,
-                                  buttons: ['Yes', 'No'],
-                                  noLink: true,
-                                });
-
-                                if (userResponse == 0){
-                                  mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`);
-                                }
-                            });
-                        }).on('error', (e) => {
-                            return downloadUpdateFailed();
-                        });
-                    });
-                }).on('error', (e) => {
-                    return downloadUpdateFailed();
+    async function downloadUpdateR(newFilesR) {
+        const files = newFilesR;
+        for (const x of files) {
+            const file = fs.createWriteStream(`${dataDir}/pokeclicker-poke-random/docs/${x}`);
+            https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/poke-random/docs/${x}`, async res => {
+                res.pipe(file).on('finish', async () => {
+                    downloadCheckR();
                 });
+            }).on('error', (e) => {
+              return downloadUpdateFailed();
             });
-        }).on('error', (e) => {
-            return downloadUpdateFailed();
+        }
+    }
+
+    async function downloadCompleteR() {
+        currentVersionR = newVersionR;
+        const fileName1 = `${dataDir}/pokeclicker-poke-random/docs/randomizer.json`;
+        const file1 = require(fileName1);
+        file1.version = newVersionR;
+        file1.files = newFilesR;
+        fs.writeFile(fileName1, JSON.stringify(file1), function writeJSON(err) {
+            if (err) return console.log(err);
         });
+
+        const userResponse = dialog.showMessageBoxSync(mainWindow, {
+            title: 'PokéRandom - Update success!',
+            message: `Successfully updated,\nwould you like to reload the page now?`,
+            icon: `${__dirname}/icon.png`,
+            buttons: ['Yes', 'No'],
+            noLink: true,
+        });
+
+        if (userResponse == 0){
+            await mainWindow.webContents.executeJavaScript(`Notifier.notify({
+                title: 'PokéRandom v${newVersionR}',
+                message: 'Now reloading...<br/>Please Wait...',
+                timeout: 2000
+            })`);
+            setTimeout(function(){ mainWindow.loadURL(`file://${dataDir}/pokeclicker-poke-random/docs/index.html`) }, 2000);
+        }
     }
 }
