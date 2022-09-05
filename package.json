@@ -10,12 +10,11 @@
   "scripts": {
     "start": "electron ./",
     "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
+    "dist:win32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
+    "dist:win64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
+    "dist:winPort": "electron-builder --windows portable",
     "dist:tux": "electron-builder --linux",
-    "dist:mac": "electron-builder --mac -c.artifactName=${productName}-setup-${version}.${ext}",
-    "dist:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
-    "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
-    "pub:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext} -p always",
-    "pub:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext} -p always",
+    "dist:mac": "electron-builder --macos",
     "win": "electron-builder --windows portable",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -36,24 +35,64 @@
   "build": {
     "appId": "pokeclicker.desktop.acsrq",
     "productName": "PokéClicker ACSRQ",
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "win": {
-      "requestedExecutionLevel": "highestAvailable",
-      "publish": [
-        {
-          "provider": "github",
-          "owner": "switchlove",
-          "repo": "Pokeclicker-desktop"
+        "win": {
+            "requestedExecutionLevel": "highestAvailable",
+            "target": "nsis"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        },
+        "mac": {
+            "category": "public.app-category.games",
+            "icon": "./build/icon_512x512.icns",
+            "target": [
+                "dmg"
+            ]
+        },
+        "dmg": {
+            "background": "./build/DMG_Background.tiff",
+            "contents": [
+                {
+                    "x": 450,
+                    "y": 115
+                },
+                {
+                    "x": 450,
+                    "y": 285,
+                    "type": "link",
+                    "path": "/Applications"
+                }
+            ],
+            "icon": "./build/icon_512x512.icns",
+            "iconSize": 75,
+            "internetEnabled": false,
+            "sign": false,
+            "title": "PokeClicker ACSRQ Installer",
+            "window": {
+                "width": 544,
+                "height": 408
+            }
+
+        },
+        "linux": {
+            "category": "Game",
+            "compression": "maximum",
+            "icon": "./build/icon_512x512.icns",
+            "target": [
+                "deb",
+                "pacman",
+                "rpm"
+            ]
+        },
+        "deb": {
+            "compression": "xz"
+        },
+        "pacman": {
+            "compression": "xz"
+        },
+        "rpm": {
+            "compression": "xz"
         }
-      ]
-    },
-    "linux": {
-      "category": "Game",
-      "icon": "icon_512x512.png"
-    },
-    "deb": {}
-  }
+    }
 }
