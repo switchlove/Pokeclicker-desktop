@@ -26,7 +26,8 @@
   "dependencies": {
     "adm-zip": "^0.5.5",
     "discord-rpc": "^4.0.1",
-    "electron-updater": "^4.3.9"
+    "electron-updater": "^4.3.9",
+    "node-gyp": "^8.3.0"
   },
   "devDependencies": {
     "electron": "^13.1.5",
@@ -34,65 +35,64 @@
   },
   "build": {
     "appId": "pokeclicker.desktop.acsrq",
-    "productName": "PokéClicker ACSRQ",
-        "win": {
-            "requestedExecutionLevel": "highestAvailable",
-            "target": "nsis"
+    "productName": "PokeClicker ACSRQ",
+    "win": {
+      "requestedExecutionLevel": "highestAvailable",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "category": "public.app-category.games",
+      "icon": "./build/icon_512x512.icns",
+      "target": [
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "background": "./build/DMG_Background.tiff",
+      "contents": [
+        {
+          "x": 450,
+          "y": 115
         },
-        "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true
-        },
-        "mac": {
-            "category": "public.app-category.games",
-            "icon": "./build/icon_512x512.icns",
-            "target": [
-                "dmg"
-            ]
-        },
-        "dmg": {
-            "background": "./build/DMG_Background.tiff",
-            "contents": [
-                {
-                    "x": 450,
-                    "y": 115
-                },
-                {
-                    "x": 450,
-                    "y": 285,
-                    "type": "link",
-                    "path": "/Applications"
-                }
-            ],
-            "icon": "./build/icon_512x512.icns",
-            "iconSize": 75,
-            "internetEnabled": false,
-            "sign": false,
-            "title": "PokeClicker ACSRQ Installer",
-            "window": {
-                "width": 544,
-                "height": 408
-            }
-
-        },
-        "linux": {
-            "category": "Game",
-            "compression": "maximum",
-            "icon": "./build/icon_512x512.icns",
-            "target": [
-                "deb",
-                "pacman",
-                "rpm"
-            ]
-        },
-        "deb": {
-            "compression": "xz"
-        },
-        "pacman": {
-            "compression": "xz"
-        },
-        "rpm": {
-            "compression": "xz"
+        {
+          "x": 450,
+          "y": 285,
+          "type": "link",
+          "path": "/Applications"
         }
+      ],
+      "icon": "./build/icon_512x512.icns",
+      "iconSize": 75,
+      "internetEnabled": false,
+      "sign": false,
+      "title": "PokeClicker ACSRQ Installer",
+      "window": {
+        "width": 544,
+        "height": 408
+      }
+    },
+    "linux": {
+      "category": "Game",
+      "compression": "maximum",
+      "icon": "./build/icon_512x512.icns",
+      "target": [
+        "deb",
+        "pacman",
+        "rpm"
+      ]
+    },
+    "deb": {
+      "compression": "xz"
+    },
+    "pacman": {
+      "compression": "xz"
+    },
+    "rpm": {
+      "compression": "xz"
     }
+  }
 }
