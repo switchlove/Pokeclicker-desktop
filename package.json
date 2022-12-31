@@ -1,6 +1,6 @@
 {
   "name": "pokerandom-desktop",
-  "version": "1.0.2",
+  "version": "1.2.0",
   "description": "PokéRandom Desktop",
   "repository": {
     "type": "git",
@@ -9,11 +9,9 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron ./",
-    "restore-src": "git restore --source=HEAD --staged --worktree -- src/poke-random && git clean -x -f -- src/poke-random",
-    "dist:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
-    "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
-    "pub:32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext} -p always",
-    "pub:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext} -p always",
+    "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
+    "dist:32": "npm run restore-src && electron-builder --ia32",
+    "dist:64": "npm run restore-src && electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
     "win": "electron-builder --windows portable",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,13 +21,13 @@
   },
   "license": "ISC",
   "dependencies": {
-    "adm-zip": "^0.5.5",
+    "adm-zip": "^0.5.9",
     "discord-rpc": "^4.0.1",
-    "electron-updater": "^4.3.9"
+    "electron-updater": "^5.0.1"
   },
   "devDependencies": {
-    "electron": "^13.1.5",
-    "electron-builder": "^22.11.7"
+    "electron": "^19.0.3",
+    "electron-builder": "^23.0.3"
   },
   "build": {
     "productName": "PokéRandom",

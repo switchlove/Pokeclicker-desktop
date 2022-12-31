@@ -37,16 +37,15 @@ if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
 	app.setAsDefaultProtocolClient(protocolClient, process.execPath);
 }
 function createWindow() {
-    mainWindow = new BrowserWindow({
-        titleBarStyle: 'default',
-        icon: __dirname + '/icon.png',
-        minWidth: 300,
-        minHeight: 200,
-        webPreferences: {
-            webSecurity: false,
-            backgroundThrottling: false,
-        },
-    });
+  mainWindow = new BrowserWindow({
+    icon: __dirname + '/icon.png',
+    minWidth: 300,
+    minHeight: 200,
+    webPreferences: {
+      webSecurity: false,
+      backgroundThrottling: false,
+    },
+  });
 
     mainWindow.webContents.on('did-finish-load', () => {
         mainWindow.webContents.executeJavaScript(
@@ -76,16 +75,15 @@ function createWindow() {
 }
 
 function createSecondaryWindow() {
-    let newWindow = new BrowserWindow({
-        titleBarStyle: 'default',
-        icon: __dirname + '/icon.png',
-        minWidth: 300,
-        minHeight: 200,
-        webPreferences: {
-            webSecurity: false,
-            backgroundThrottling: false,
-        },
-    });
+  let newWindow = new BrowserWindow({
+    icon: __dirname + '/icon.png',
+    minWidth: 300,
+    minHeight: 200,
+    webPreferences: {
+      webSecurity: false,
+      backgroundThrottling: false,
+    },
+  });
 
     newWindow.setMenuBarVisibility(false);
     newWindow.setTitle('PokéRandom (alternate)');
@@ -146,8 +144,7 @@ if (!isMainInstance) {
     // Only needed if you want to use spectate, join, or ask to join
     DiscordRPC.register(clientId);
 
-    const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-    const startTimestamp = new Date();
+  const rpc = new DiscordRPC.Client({ transport: 'ipc' });
 
     async function setActivity() {
         if (!rpc || !mainWindow) {
@@ -163,18 +160,14 @@ if (!isMainInstance) {
             console.warn('Something went wrong, could not gather discord RP data');
         }
 
-        // You'll need to have image assets uploaded to
-        // https://discord.com/developers/applications/<application_id>/rich-presence/assets
-        rpc.setActivity({
-            details: line1.length <= 1 ? '--' : line1.substr(0, 128),
-            state: line2.length <= 1 ? '--' : line2.substr(0, 128),
-            // largeImageKey: 'image_name',
-            // largeImageText: 'text when hovered',
-            // smallImageKey: 'image_name',
-            // smallImageText: 'text when hovered',
-            instance: false,
-        });
-    }
+    // You'll need to have image assets uploaded to
+    // https://discord.com/developers/applications/<application_id>/rich-presence/assets
+    rpc.setActivity({
+      details: line1.length <= 1 ? '--' : line1.substr(0, 128),
+      state: line2.length <= 1 ? '--' : line2.substr(0, 128),
+      instance:true,
+    });
+  }
 
     rpc.on('ready', () => {
         setActivity();
