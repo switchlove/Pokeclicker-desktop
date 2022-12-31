@@ -10,9 +10,10 @@
   "scripts": {
     "start": "electron ./",
     "restore-src": "git restore --source=HEAD --staged --worktree -- src/pokeclicker-master && git clean -x -f -- src/pokeclicker-master",
-    "dist:32": "npm run restore-src && electron-builder --ia32",
-    "dist:64": "npm run restore-src && electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
-    "win": "electron-builder --windows portable",
+    "dist:win32": "electron-builder --ia32 -c.artifactName=${productName}-32bit-setup-${version}.${ext}",
+    "dist:win64": "electron-builder --windows --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
+    "dist:winPort": "electron-builder --windows portable",
+    "dist:tux": "electron-builder --linux",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
@@ -23,31 +24,46 @@
   "dependencies": {
     "adm-zip": "^0.5.9",
     "discord-rpc": "^4.0.1",
-    "electron-updater": "^5.0.1"
-  },
-  "devDependencies": {
-    "electron": "^19.0.3",
-    "electron-builder": "^23.0.3"
-  },
-  "build": {
+    "electron-updater": "^5.3.0"
+},
+"devDependencies": {
+    "electron": "^21.3.1",
+    "electron-builder": "^23.6.0"
+},
+"build": {
+    "appId": "pokerandom.desktop",
     "productName": "PokéRandom",
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
+    "publish": [
+        {
+            "provider": "github",
+            "owner": "switchlove",
+            "repo": "Pokerandom-desktop"
+        }
+    ],
     "win": {
-      "requestedExecutionLevel": "highestAvailable",
-      "publish": [{
-          "provider": "github",
-          "owner": "switchlove",
-          "repo": "Pokeclicker-desktop"
-      }]
+        "requestedExecutionLevel": "highestAvailable",
+        "target": "nsis"
+    },
+    "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+        "category": "public.app-category.games",
+        "icon": "./build/icon_512x512.icns",
+        "target": [
+            "dmg",
+            "pkg"
+        ]
     },
     "linux": {
-      "category": "Game",
-      "icon": "icon_512x512.png"
+        "category": "Game",
+        "compression": "maximum",
+        "icon": "icon_512x512.png",
+        "target": "deb"
     },
-    "deb": {},
-    "appId": "pokerandom.desktop"
-  }
+    "deb": {
+        "compression": "xz"
+    }
+}
 }
