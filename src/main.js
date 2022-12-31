@@ -34,7 +34,6 @@ if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    titleBarStyle: 'default',
     icon: __dirname + '/icon.png',
     minWidth: 300,
     minHeight: 200,
@@ -73,7 +72,6 @@ function createWindow() {
 
 function createSecondaryWindow() {
   let newWindow = new BrowserWindow({
-    titleBarStyle: 'default',
     icon: __dirname + '/icon.png',
     minWidth: 300,
     minHeight: 200,
@@ -142,7 +140,6 @@ if (!isMainInstance) {
   DiscordRPC.register(clientId);
 
   const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-  const startTimestamp = new Date();
 
   async function setActivity() {
     if (!rpc || !mainWindow) {
@@ -163,11 +160,7 @@ if (!isMainInstance) {
     rpc.setActivity({
       details: line1.length <= 1 ? '--' : line1.substr(0, 128),
       state: line2.length <= 1 ? '--' : line2.substr(0, 128),
-      // largeImageKey: 'image_name',
-      // largeImageText: 'text when hovered',
-      // smallImageKey: 'image_name',
-      // smallImageText: 'text when hovered',
-      instance: false,
+      instance:true,
     });
   }
 
