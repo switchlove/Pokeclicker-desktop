@@ -26,7 +26,7 @@ let windowClosed = false;
 
 let mainWindow;
 
-const protocolClient = 'pokeclicker-desktop-acsrq_pokeclicker-desktop-acsrq.desktop';
+const protocolClient = 'pokeclicker-desktop-acsrq-beta_pokeclicker-desktop-acsrq-beta.desktop';
 if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
 	app.setAsDefaultProtocolClient(protocolClient, process.execPath);
 }
@@ -34,7 +34,7 @@ if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
 function createWindow() {
   // Set the Application for Desktop notifications (windows only)
   try {
-    app.setAppUserModelId('PokéClicker');
+    app.setAppUserModelId('PokéClicker ACSRQ Beta');
   } catch (e) {}
 
   mainWindow = new BrowserWindow({
@@ -54,13 +54,13 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setTitle('PokéClicker ACSRQ');
+  mainWindow.setTitle('PokéClicker ACSRQ Beta');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/pokeclicker-acsrq/docs/index.html`)) {
-    mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/pokeclicker-acsrq-beta/docs/index.html`)) {
+    mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
   } else {
-    mainWindow.loadURL(`file://${__dirname}/pokeclicker-acsrq/docs/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/pokeclicker-acsrq-beta/docs/index.html`);
   }
 
   mainWindow.on('close', (event) => {
@@ -89,10 +89,10 @@ function createSecondaryWindow() {
   newWindow.setTitle('PokéClicker ACSRQ (alternate)');
 
   // Check if we've already downloaded the data, otherwise load our loading screen
-  if (fs.existsSync(`${dataDir}/pokeclicker-acsrq/docs/index.html`)) {
-    newWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
+  if (fs.existsSync(`${dataDir}/pokeclicker-acsrq-beta/docs/index.html`)) {
+    newWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
   } else {
-    newWindow.loadURL(`file://${__dirname}/pokeclicker-acsrq/docs/index.html`);
+    newWindow.loadURL(`file://${__dirname}/pokeclicker-acsrq-beta/docs/index.html`);
   }
 
   newWindow.on('close', (event) => {
@@ -199,7 +199,7 @@ if (!isMainInstance) {
   const downloadUpdate = async (initial = false) => {
     const zipFilePath = `${dataDir}/update.zip`;
     const file = fs.createWriteStream(zipFilePath);
-    https.get('https://codeload.github.com/switchlove/pokeclicker/zip/acsrq', async res => {
+    https.get('https://codeload.github.com/switchlove/pokeclicker/zip/acsrq-beta', async res => {
       let cur = 0;
       try {
         if (!initial) await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersion}', message: 'Downloading Files...<br/><span id="update-message-progress">Please Wait...</span>', timeout: 1e6 })`);
@@ -221,7 +221,7 @@ if (!isMainInstance) {
 
         const zip = new Zip(zipFilePath);
 
-        const extracted = zip.extractEntryTo('pokeclicker-acsrq/docs/', `${dataDir}`, true, true);
+        const extracted = zip.extractEntryTo('pokeclicker-acsrq-beta/docs/', `${dataDir}`, true, true);
 
         fs.unlinkSync(zipFilePath);
 
@@ -234,7 +234,7 @@ if (!isMainInstance) {
 
         // If this is the initial download, don't ask the user about refreshing the page
         if (initial) {
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
           return;
           setTimeout(checkForUpdates, 3000);
         }
@@ -248,7 +248,7 @@ if (!isMainInstance) {
         });
 
         if (userResponse == 0){
-          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`);
+          mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
         }
       });
     }).on('error', (e) => {
@@ -275,7 +275,7 @@ if (!isMainInstance) {
   }
 
   const checkForUpdates = () => {
-    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/package.json', res => {
+    const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/package.json', res => {
       let body = '';
 
       res.on('data', d => {
@@ -338,7 +338,7 @@ if (!isMainInstance) {
 
   try {
     // If we can get our current version, start checking for updates once the game starts
-    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/package.json`).toString()).version;
+    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq-beta/docs/package.json`).toString()).version;
     if (currentVersion == '0.0.0') throw Error('Must re-download updated version');
     setTimeout(() => {
       startUpdateCheckInterval(true);
@@ -373,8 +373,8 @@ if (!isMainInstance) {
   ACSRQ UPDATE STUFF
   */
   const checkForUpdatesA6 = () => {
-      currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq/docs/acsrq.json`).toString()).version;
-      const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/acsrq.json', res => {
+      currentVersionA6 = JSON.parse(fs.readFileSync(`${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`).toString()).version;
+      const request = https.get('https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/acsrq.json', res => {
           let body = '';
 
           res.on('data', d => {
@@ -390,7 +390,7 @@ if (!isMainInstance) {
                   const newVersionAvailable = data.version.localeCompare(currentVersionA6, undefined, { numeric: true }) === 1
                   if (newVersionAvailable) {
                       const userResponse = dialog.showMessageBoxSync(mainWindow, {
-                          title: 'ACSRQ - Script update available!',
+                          title: 'ACSRQ Beta - Script update available!',
                           message: `There is a new script update available (v${newVersionA6}),\nWould you like to download it now?\n\n`,
                           icon: `${__dirname}/icon.png`,
                           buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
@@ -428,8 +428,8 @@ if (!isMainInstance) {
   async function downloadUpdateA6(newFilesA6) {
       const files = newFilesA6;
       for (const x of files) {
-          const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq/docs/${x}`);
-          https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/docs/${x}`, async res => {
+          const file = fs.createWriteStream(`${dataDir}/pokeclicker-acsrq-beta/docs/${x}`);
+          https.get(`https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq-beta/docs/${x}`, async res => {
               res.pipe(file).on('finish', async () => {
                   downloadCheckA6();
               });
@@ -441,7 +441,7 @@ if (!isMainInstance) {
 
   async function downloadCompleteA6() {
       currentVersionA6 = newVersionA6;
-      const fileName1 = `${dataDir}/pokeclicker-acsrq/docs/acsrq.json`;
+      const fileName1 = `${dataDir}/pokeclicker-acsrq-beta/docs/acsrq.json`;
       const file1 = require(fileName1);
       file1.version = newVersionA6;
       file1.files = newFilesA6;
@@ -450,7 +450,7 @@ if (!isMainInstance) {
       });
 
       const userResponse = dialog.showMessageBoxSync(mainWindow, {
-          title: 'ACSRQ - Update success!',
+          title: 'ACSRQ Beta - Update success!',
           message: `Successfully updated,\nwould you like to reload the page now?`,
           icon: `${__dirname}/icon.png`,
           buttons: ['Yes', 'No'],
@@ -459,7 +459,7 @@ if (!isMainInstance) {
 
       if (userResponse == 0){
           await mainWindow.webContents.executeJavaScript(`Notifier.notify({
-              title: 'ACSRQ v${newVersion}',
+              title: 'ACSRQ Beta v${newVersion}',
               message: 'Now reloading...<br/>Please Wait...',
               timeout: 2000
           })`);
