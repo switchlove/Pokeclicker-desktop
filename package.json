@@ -1,7 +1,7 @@
 {
-    "name": "pokeclicker-desktop-acsrq",
+    "name": "pokeclicker-desktop-acsrq-beta",
     "version": "1.2.0",
-    "description": "PokeClicker Desktop ACSRQ",
+    "description": "PokeClicker Desktop ACSRQ Beta",
     "repository": {
         "type": "git",
         "url": "https://github.com/switchlove/Pokeclicker-desktop.git"
@@ -34,8 +34,8 @@
         "electron-builder": "^23.6.0"
     },
     "build": {
-        "appId": "pokeclicker.desktop.acsrq",
-        "productName": "PokeClicker ACSRQ",
+        "appId": "pokeclicker.desktop.acsrq.beta",
+        "productName": "PokeClicker ACSRQ Beta",
         "publish": [
             {
                 "provider": "github",
