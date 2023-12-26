@@ -463,7 +463,7 @@ if (!isMainInstance) {
               message: 'Now reloading...<br/>Please Wait...',
               timeout: 2000
           })`);
-          setTimeout(function(){ mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`) }, 2000);
+          setTimeout(function(){ mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq/docs/index.html`) }, 2000);
       }
   }
 
