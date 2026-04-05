@@ -10,10 +10,13 @@ const fs = require('fs');
 const Zip = require('adm-zip');
 const electron = require('electron');
 const clientVersion = app.getVersion();
+const isPrereleaseBuild = /-(alpha|beta|rc)(\.\d+)?$/i.test(clientVersion);
+const updaterChannel = isPrereleaseBuild ? 'beta' : 'latest';
 
-const dataDir =  (electron.app || electron.remote.app).getPath('userData');
+const dataDir = app.getPath('userData');
 
 console.info('Data directory:', dataDir);
+console.info('Updater channel:', updaterChannel);
 
 let checkForUpdatesInterval;
 let newVersion = '0.0.0';
@@ -42,7 +45,11 @@ function createWindow() {
     minWidth: 300,
     minHeight: 200,
     webPreferences: {
+      // webSecurity must stay false: the game HTML loaded via file:// makes
+      // cross-origin requests to external APIs; enabling it breaks those calls.
       webSecurity: false,
+      contextIsolation: true,
+      nodeIntegration: false,
       backgroundThrottling: false,
     },
   });
@@ -81,6 +88,8 @@ function createSecondaryWindow() {
     minHeight: 200,
     webPreferences: {
       webSecurity: false,
+      contextIsolation: true,
+      nodeIntegration: false,
       backgroundThrottling: false,
     },
   });
@@ -96,7 +105,7 @@ function createSecondaryWindow() {
   }
 
   newWindow.on('close', (event) => {
-    newWindow = true
+    windowClosed = true
   })
   newWindow.on('closed', () => {
     newWindow = null;
@@ -235,8 +244,7 @@ if (!isMainInstance) {
         // If this is the initial download, don't ask the user about refreshing the page
         if (initial) {
           mainWindow.loadURL(`file://${dataDir}/pokeclicker-acsrq-beta/docs/index.html`);
-          return;
-          setTimeout(checkForUpdates, 3000);
+           return;
         }
 
         const userResponse = dialog.showMessageBoxSync(mainWindow, {
@@ -350,6 +358,9 @@ if (!isMainInstance) {
   }
 
   try {
+    autoUpdater.channel = updaterChannel;
+    autoUpdater.allowPrerelease = isPrereleaseBuild;
+
     autoUpdater.on('update-downloaded', () => {
       const userResponse = dialog.showMessageBoxSync(mainWindow, {
         title: 'PokeClicker - Client Update Available!',
@@ -422,7 +433,7 @@ if (!isMainInstance) {
 
   async function downloadCheckA6() {
       newDownloaded++;
-      if (newDownloaded === 3) downloadCompleteA6();
+      if (newDownloaded === newFilesA6.length) downloadCompleteA6();
   }
 
   async function downloadUpdateA6(newFilesA6) {

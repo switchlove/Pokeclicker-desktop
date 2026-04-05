@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quick-check:
+    name: Quick validation (ubuntu-latest)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.12.1
+
+      - name: Show toolchain versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quick Linux smoke test
+        run: npm run dist:tux
+
+  release-builds:
+    name: Release build (${{ matrix.build_name }} on ${{ matrix.os }})
+    if: github.event_name != 'pull_request'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build_name: linux
+            build_command: npm run dist:tux
+          - os: macos-latest
+            build_name: macos
+            build_command: npm run dist:mac
+          - os: windows-latest
+            build_name: win32
+            build_command: npm run dist:win32
+          - os: windows-latest
+            build_name: win64
+            build_command: npm run dist:win64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.12.1
+
+      - name: Show toolchain versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Install macOS DMG dependency
+        if: runner.os == 'macOS'
+        run: brew install gettext
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Full platform smoke test
+        run: ${{ matrix.build_command }}
