@@ -11,37 +11,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quick-check:
-    name: Quick validation (ubuntu-latest)
-    if: github.event_name == 'pull_request' || github.ref_name == 'beta' || github.ref_name == 'acsrq'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Set up pinned Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Set up pinned npm
-        run: npm install --global npm@11.12.1
-
-      - name: Show toolchain versions
-        run: |
-          node -v
-          npm -v
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Quick Linux smoke test
-        run: npm run dist:tux
-
   release-builds:
     name: Release build (${{ matrix.build_name }} on ${{ matrix.os }})
     if: github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'beta' || github.ref_name == 'acsrq'
