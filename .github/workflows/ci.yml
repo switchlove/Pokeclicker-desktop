@@ -6,9 +6,14 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quick-check:
     name: Quick validation (ubuntu-latest)
+    if: github.event_name == 'pull_request' || github.ref_name == 'beta' || github.ref_name == 'acsrq'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
