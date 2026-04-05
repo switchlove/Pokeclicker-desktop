@@ -39,7 +39,7 @@ jobs:
 
   release-builds:
     name: Release build (${{ matrix.build_name }} on ${{ matrix.os }})
-    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_name == 'master'
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'beta' || github.ref_name == 'acsrq'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
