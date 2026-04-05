@@ -1,6 +1,6 @@
 {
     "name": "pokeclicker-desktop-acsrq-beta",
-    "version": "1.2.0",
+    "version": "1.2.1-beta.0",
     "description": "PokeClicker Desktop ACSRQ Beta",
     "repository": {
         "type": "git",
@@ -71,7 +71,13 @@
             "hardenedRuntime": true,
             "icon": "./build/icon_512x512.icns",
             "target": [
-                { "target": "dmg", "arch": ["x64", "arm64"] }
+                {
+                    "target": "dmg",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                }
             ]
         },
         "dmg": {
