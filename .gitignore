@@ -1,3 +1,5 @@
 
 node_modules/
 dist/
+src/pokeclicker-master/
+.DS_Store

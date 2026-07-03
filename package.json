@@ -1,48 +1,96 @@
 {
-  "name": "pokeclicker-desktop",
-  "version": "1.2.0",
-  "description": "PokeClicker Desktop",
+  "name": "pokeclicker-desktop-new-wave",
+  "version": "1.2.1-beta.0",
+  "description": "PokeClicker Desktop NewWave",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RedSparr0w/Pokeclicker-desktop.git"
+    "url": "https://github.com/switchlove/Pokeclicker-desktop.git"
   },
   "main": "src/main.js",
   "scripts": {
     "start": "electron ./",
-    "dist:32": "electron-builder --ia32",
-    "dist:64": "electron-builder --x64 -c.artifactName=${productName}-64bit-setup-${version}.${ext}",
+    "dist:win32": "electron-builder --win --ia32 --publish never",
+    "dist:win64": "electron-builder --win --x64 --publish never",
+    "dist:winPort": "electron-builder --windows portable --publish never",
+    "dist:tux": "electron-builder --linux --publish never",
+    "dist:mac": "electron-builder --macos --x64 --publish never",
+    "dist:mac:arm": "electron-builder --macos --arm64 --publish never",
+    "dist:mac:universal": "electron-builder --macos --universal --publish never",
     "win": "electron-builder --windows portable",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
-    "name": "RedSparr0w",
-    "email": "desktop@pokeclicker.com"
+    "name": "SwitchLove",
+    "email": "dev@switchlove.app"
   },
   "license": "ISC",
+  "packageManager": "npm@11.12.1",
+  "engines": {
+    "node": "24.14.1",
+    "npm": "11.12.1"
+  },
   "dependencies": {
     "adm-zip": "^0.5.9",
     "discord-rpc": "^4.0.1",
-    "electron-updater": "^5.3.0"
+    "electron-updater": "^6.3.0"
   },
   "devDependencies": {
     "electron": "^21.3.1",
     "electron-builder": "^23.6.0"
   },
   "build": {
-    "productName": "PokéClicker",
+    "appId": "pokeclicker.desktop.acsrq.beta",
+    "productName": "PokeClicker ACSRQ Beta",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "generateUpdatesFilesForAllChannels": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "switchlove",
+        "repo": "Pokeclicker-desktop",
+        "channel": "latest",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "requestedExecutionLevel": "highestAvailable",
+      "target": "nsis"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
-    "win": {
-      "requestedExecutionLevel": "highestAvailable"
+    "mac": {
+      "category": "public.app-category.games",
+      "hardenedRuntime": true,
+      "icon": "./build/icon_512x512.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "background": "./build/DMG_Background.tiff",
+      "icon": "./build/icon_512x512.icns",
+      "iconSize": 112,
+      "window": {
+        "width": 680,
+        "height": 380
+      }
     },
     "linux": {
       "category": "Game",
-      "icon": "icon_512x512.png",
+      "compression": "maximum",
+      "icon": "./build/icon_512x512.png",
       "target": "deb"
     },
-    "deb": {},
-    "appId": "pokeclicker.desktop"
+    "deb": {
+      "compression": "xz"
+    }
   }
 }
