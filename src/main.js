@@ -4,7 +4,7 @@
 
 const { autoUpdater } = require('electron-updater');
 const { app, BrowserWindow, dialog } = require('electron');
-const DiscordRPC = require('discord-rpc');
+const { Client: DiscordRPCClient } = require('@xhayper/discord-rpc');
 const https = require('https');
 const fs = require('fs');
 const Zip = require('adm-zip');
@@ -138,10 +138,7 @@ if (!isMainInstance) {
   // Set this to your Client ID.
   const clientId = '733927271726841887';
 
-  // Only needed if you want to use spectate, join, or ask to join
-  DiscordRPC.register(clientId);
-
-  const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+  const rpc = new DiscordRPCClient({ clientId });
 
   async function setActivity() {
     if (!rpc || !mainWindow) {
@@ -157,7 +154,7 @@ if (!isMainInstance) {
     }
 
     if (!discordData.enabled) {
-      return rpc.clearActivity();
+      return rpc.user?.clearActivity();
     }
 
     // You'll need to have image assets uploaded to
@@ -173,7 +170,7 @@ if (!isMainInstance) {
     if (discordData.smallImageKey) activity.smallImageKey = discordData.smallImageKey;
     if (discordData.smallImageKey && discordData.smallImageText) activity.smallImageText = discordData.smallImageText.substr(0, 128);
 
-    rpc.setActivity(activity);
+    rpc.user?.setActivity(activity);
   }
 
   rpc.on('ready', () => {
@@ -185,7 +182,7 @@ if (!isMainInstance) {
     }, 15e3);
   });
 
-  rpc.login({ clientId }).catch(console.error);
+  rpc.login().catch(console.error);
 
   /*
   UPDATE STUFF

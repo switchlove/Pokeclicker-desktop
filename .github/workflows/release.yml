@@ -1,0 +1,211 @@
+name: Release
+run-name: Release build (${{ github.event.release.tag_name || github.ref_name || 'manual' }})
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-artifacts:
+    name: Build release artifacts (${{ matrix.build_name }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build_name: linux
+            build_command: npm run dist:tux
+          - os: macos-latest
+            build_name: macos
+            build_command: npm run dist:mac
+          - os: windows-latest
+            build_name: win32
+            build_command: npm run dist:win32
+          - os: windows-latest
+            build_name: win64
+            build_command: npm run dist:win64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.12.1
+
+      - name: Show toolchain versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Ensure macOS DMG dependency
+        if: runner.os == 'macOS'
+        run: brew list gettext >/dev/null 2>&1 || brew install gettext
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve release metadata
+        shell: bash
+        env:
+          TAG_NAME_INPUT: ${{ github.event.release.tag_name || github.ref_name }}
+          IS_PRERELEASE_INPUT: ${{ github.event_name == 'release' && github.event.release.prerelease || false }}
+        run: |
+          echo "TAG_NAME=$TAG_NAME_INPUT" >> "$GITHUB_ENV"
+          if [[ "$IS_PRERELEASE_INPUT" == "true" || "$TAG_NAME_INPUT" =~ -(alpha|beta|rc)(\.[0-9]+)?$ ]]; then
+            echo "IS_PRERELEASE=true" >> "$GITHUB_ENV"
+            echo "RELEASE_CHANNEL=beta" >> "$GITHUB_ENV"
+            echo "RELEASE_TYPE=prerelease" >> "$GITHUB_ENV"
+          else
+            echo "IS_PRERELEASE=false" >> "$GITHUB_ENV"
+            echo "RELEASE_CHANNEL=latest" >> "$GITHUB_ENV"
+            echo "RELEASE_TYPE=release" >> "$GITHUB_ENV"
+          fi
+
+      - name: Show release channel
+        run: |
+          echo "Tag: $TAG_NAME"
+          echo "Release channel: $RELEASE_CHANNEL"
+          echo "Release type: $RELEASE_TYPE"
+
+      - name: Validate release channel and tag format
+        shell: bash
+        run: |
+          echo "Tag: $TAG_NAME"
+          echo "Prerelease: $IS_PRERELEASE"
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            if [[ ! "$TAG_NAME" =~ -(alpha|beta|rc)(\.[0-9]+)?$ ]]; then
+              echo "Prerelease tags must include a suffix like -beta.1, -alpha.1, or -rc.1"
+              exit 1
+            fi
+          else
+            if [[ "$TAG_NAME" =~ -(alpha|beta|rc)(\.[0-9]+)?$ ]]; then
+              echo "Stable releases must not include a prerelease suffix"
+              exit 1
+            fi
+          fi
+
+      - name: Build release artifacts
+        run: ${{ matrix.build_command }} -- --config.publish.channel=$RELEASE_CHANNEL --config.publish.releaseType=$RELEASE_TYPE
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.build_name }}
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.deb
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.blockmap
+            dist/latest*.yml
+            dist/beta*.yml
+
+  publish-release:
+    name: Publish release assets and checksums
+    if: github.event_name == 'release'
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          pattern: release-*
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd release-artifacts
+          find . -maxdepth 1 -type f | sort | xargs sha256sum > SHA256SUMS.txt
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          body_path: .github/release-template.md
+          append_body: true
+          files: |
+            release-artifacts/*.dmg
+            release-artifacts/*.deb
+            release-artifacts/*.exe
+            release-artifacts/*.AppImage
+            release-artifacts/*.blockmap
+            release-artifacts/latest*.yml
+            release-artifacts/beta*.yml
+            release-artifacts/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Append downloads summary and checksums to release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import re
+          import subprocess
+          import os
+
+          tag = os.environ['TAG_NAME']
+          current = subprocess.check_output(
+              ['gh', 'release', 'view', tag, '--json', 'body', '-q', '.body'],
+              text=True,
+          )
+          current = re.sub(
+              r'\n## Release assets\n.*?\n## SHA256 checksums\n```text\n.*?```\n?$',
+              '\n',
+              current,
+              flags=re.S,
+          ).rstrip()
+
+          artifact_dir = pathlib.Path('release-artifacts')
+          files = sorted(p.name for p in artifact_dir.iterdir() if p.is_file())
+
+          sections = {
+              'Windows 64-bit': [f for f in files if '-win-x64.' in f or 'x64' in f and f.endswith('.exe')],
+              'Windows 32-bit': [f for f in files if '-win-ia32.' in f or '32bit' in f and f.endswith('.exe')],
+              'macOS': [f for f in files if f.endswith('.dmg')],
+              'Linux': [f for f in files if f.endswith('.deb') or f.endswith('.AppImage')],
+          }
+
+          lines = ['## Release assets', '']
+          for title, matches in sections.items():
+              if matches:
+                  lines.append(f'- **{title}**')
+                  for name in matches:
+                      lines.append(f'  - `{name}`')
+          checksums = (artifact_dir / 'SHA256SUMS.txt').read_text().rstrip()
+          notes = (
+              current
+              + '\n\n'
+              + '\n'.join(lines)
+              + '\n\n## SHA256 checksums\n```text\n'
+              + checksums
+              + '\n```\n'
+          ).lstrip()
+          pathlib.Path('RELEASE_NOTES.md').write_text(notes)
+          PY
+          gh release edit "$TAG_NAME" --notes-file RELEASE_NOTES.md
