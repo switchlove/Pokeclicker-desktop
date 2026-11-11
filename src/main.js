@@ -24,6 +24,9 @@ console.info('Data directory:', dataDir);
 let checkForUpdatesInterval;
 let newVersion = '0.0.0';
 let currentVersion = '0.0.0';
+// ACSRQ script version, so script-only updates can ship without a game version bump
+let newAcsrqVersion = '0.0.0';
+let currentAcsrqVersion = '0.0.0';
 let windowClosed = false;
 
 let mainWindow;
@@ -187,8 +190,23 @@ if (!isMainInstance) {
   /*
   UPDATE STUFF
   */
-  const isNewerVersion = (version) => {
-    return version.localeCompare(currentVersion, undefined, { numeric: true }) === 1;
+  const VERSION_REGEX = /^\d+\.\d+\.\d+[\w.-]*$/;
+
+  const compareVersions = (a, b) => a.localeCompare(b, undefined, { numeric: true });
+
+  // A newer game version wins; on the same game version, a newer ACSRQ version is an update
+  const isNewerVersion = (version, acsrqVersion) => {
+    const game = compareVersions(version, currentVersion);
+    return game === 1 || (game === 0 && compareVersions(acsrqVersion, currentAcsrqVersion) === 1);
+  }
+
+  const versionLabel = () => `v${newVersion}` + (newAcsrqVersion !== '0.0.0' ? ` (ACSRQ ${newAcsrqVersion})` : '');
+
+  // Throws if the game hasn't been downloaded yet
+  const readInstalledVersions = () => {
+    const installed = JSON.parse(fs.readFileSync(`${dataDir}/${GAME_PACKAGE_JSON}`).toString());
+    currentVersion = installed.version;
+    currentAcsrqVersion = installed.acsrqVersion || '0.0.0';
   }
 
   const downloadUpdate = async (initial = false) => {
@@ -198,7 +216,7 @@ if (!isMainInstance) {
       let cur = 0;
       let progressPending = false;
       try {
-        if (!initial) await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersion}', message: 'Downloading Files...<br/><span id="update-message-progress">Please Wait...</span>', timeout: 1e6 })`);
+        if (!initial) await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] ${versionLabel()}', message: 'Downloading Files...<br/><span id="update-message-progress">Please Wait...</span>', timeout: 1e6 })`);
       }catch(e){}
 
       res.on('data', async chunk => {
@@ -216,7 +234,7 @@ if (!isMainInstance) {
       res.pipe(file).on('finish', async () => {
         try {
           if (initial) await mainWindow.webContents.executeJavaScript('setStatus("Files Downloaded!<br/>Extracting Files...")');
-          else await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersion}', message: 'Files Downloaded!<br/>Extracting Files...', timeout: 2e4 })`);
+          else await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] ${versionLabel()}', message: 'Files Downloaded!<br/>Extracting Files...', timeout: 2e4 })`);
         }catch(e){}
 
         const zip = new Zip(zipFilePath);
@@ -229,7 +247,11 @@ if (!isMainInstance) {
           return downloadUpdateFailed();
         }
 
-        currentVersion = newVersion;
+        try {
+          readInstalledVersions();
+        } catch (e) {
+          return downloadUpdateFailed();
+        }
         startUpdateCheckInterval();
 
         // If this is the initial download, don't ask the user about refreshing the page
@@ -285,9 +307,10 @@ if (!isMainInstance) {
         let data = {version:'0.0.0'};
         try {
           data = JSON.parse(body);
-          if (!/^\d+\.\d+\.\d+[\w.-]*$/.test(data.version)) return;
+          if (!VERSION_REGEX.test(data.version)) return;
           newVersion = data.version;
-          const newVersionAvailable = isNewerVersion(data.version);
+          newAcsrqVersion = VERSION_REGEX.test(data.acsrqVersion) ? data.acsrqVersion : '0.0.0';
+          const newVersionAvailable = isNewerVersion(newVersion, newAcsrqVersion);
 
           if (newVersionAvailable) {
             // Stop checking for updates
@@ -307,7 +330,7 @@ if (!isMainInstance) {
   const shouldUpdateNowCheck = () => {
     const userResponse = dialog.showMessageBoxSync(mainWindow, {
       title: 'PokeClicker - Update available!',
-      message: `There is a new update available (v${newVersion}),\nWould you like to download it now?\n\n`,
+      message: `There is a new update available (${versionLabel()}),\nWould you like to download it now?\n\n`,
       icon: `${__dirname}/icon.png`,
       buttons: ['Update Now', 'Remind Me', 'No (disable check)'],
       noLink: true,
@@ -337,7 +360,7 @@ if (!isMainInstance) {
 
   try {
     // If we can get our current version, start checking for updates once the game starts
-    currentVersion = JSON.parse(fs.readFileSync(`${dataDir}/${GAME_PACKAGE_JSON}`).toString()).version;
+    readInstalledVersions();
     if (currentVersion == '0.0.0') throw Error('Must re-download updated version');
     setTimeout(() => {
       startUpdateCheckInterval(true);
