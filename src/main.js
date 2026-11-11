@@ -46,7 +46,7 @@ function createWindow() {
 
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.executeJavaScript(
-      `(() => { DiscordRichPresence.clientVersion = '${clientVersion}' })()`
+      `(() => { DiscordRichPresence.clientVersion = ${JSON.stringify(clientVersion)} })()`
     ).catch(e=>{});
   });
 
@@ -148,7 +148,7 @@ if (!isMainInstance) {
     let discordData = {};
 
     try {
-      discordData = await mainWindow.webContents.executeJavaScript('DiscordRichPresence.getRichPresenceData()');
+      discordData = await mainWindow.webContents.executeJavaScript(`typeof DiscordRichPresence !== 'undefined' ? DiscordRichPresence.getRichPresenceData() : {}`);
     } catch (e) {
       console.warn('Something went wrong, could not gather discord RP data');
     }
@@ -162,8 +162,8 @@ if (!isMainInstance) {
     const activity = {
       instance: true,
     };
-    activity.details = discordData.line1?.length <= 1 ? '--' : discordData.line1.substr(0, 128);
-    activity.state = discordData.line2?.length <= 1 ? '--' : discordData.line2.substr(0, 128);
+    activity.details = discordData.line1?.length > 1 ? discordData.line1.substr(0, 128) : '--';
+    activity.state = discordData.line2?.length > 1 ? discordData.line2.substr(0, 128) : '--';
     if (discordData.startTimestamp) activity.startTimestamp = discordData.startTimestamp;
     if (discordData.largeImageKey) activity.largeImageKey = discordData.largeImageKey;
     if (discordData.largeImageKey && discordData.largeImageText) activity.largeImageText = discordData.largeImageText.substr(0, 128);
@@ -196,16 +196,21 @@ if (!isMainInstance) {
     const file = fs.createWriteStream(zipFilePath);
     https.get(DOWNLOAD_URL, async res => {
       let cur = 0;
+      let progressPending = false;
       try {
         if (!initial) await mainWindow.webContents.executeJavaScript(`Notifier.notify({ title: '[UPDATER] v${newVersion}', message: 'Downloading Files...<br/><span id="update-message-progress">Please Wait...</span>', timeout: 1e6 })`);
       }catch(e){}
 
       res.on('data', async chunk => {
           cur += chunk.length;
+          if (progressPending) return;
+          progressPending = true;
           try {
             if (initial) await mainWindow.webContents.executeJavaScript(`setStatus("Downloading Files...<br/>${(cur / 1048576).toFixed(2)} mb")`);
             else await mainWindow.webContents.executeJavaScript(`document.getElementById('update-message-progress').innerText = "${(cur / 1048576).toFixed(2)} mb"`);
-          }catch(e){}
+          }catch(e){} finally {
+            progressPending = false;
+          }
       });
 
       res.pipe(file).on('finish', async () => {
@@ -252,7 +257,7 @@ if (!isMainInstance) {
 
   const downloadUpdateFailed = () => {
     // If client exe updating, return
-    if (windowClosed) return;
+    if (windowClosed || !mainWindow) return;
 
     const userResponse = dialog.showMessageBoxSync(mainWindow, {
       type: 'error',
@@ -280,6 +285,7 @@ if (!isMainInstance) {
         let data = {version:'0.0.0'};
         try {
           data = JSON.parse(body);
+          if (!/^\d+\.\d+\.\d+[\w.-]*$/.test(data.version)) return;
           newVersion = data.version;
           const newVersionAvailable = isNewerVersion(data.version);
 
@@ -323,6 +329,7 @@ if (!isMainInstance) {
 
   const startUpdateCheckInterval = (run_now = false) => {
     // Check for updates every hour
+    clearInterval(checkForUpdatesInterval);
     checkForUpdatesInterval = setInterval(checkForUpdates, 36e5)
     if (run_now) checkForUpdates();
   }
