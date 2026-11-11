@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, master, acsrq, beta]
+    branches: [main, master, acsrq, beta, new-wave]
   pull_request:
   workflow_dispatch:
 
@@ -13,7 +13,7 @@ concurrency:
 jobs:
   release-builds:
     name: Release build (${{ matrix.build_name }} on ${{ matrix.os }})
-    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'beta' || github.ref_name == 'acsrq'
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'beta' || github.ref_name == 'acsrq' || github.ref_name == 'new-wave'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
