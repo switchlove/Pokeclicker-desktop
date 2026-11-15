@@ -1,7 +1,7 @@
 {
-  "name": "pokeclicker-desktop-new-wave",
-  "version": "1.2.1-beta.1",
-  "description": "PokeClicker Desktop NewWave",
+  "name": "pokeclicker-desktop-acsrq",
+  "version": "1.2.1",
+  "description": "PokeClicker Desktop ACSRQ",
   "repository": {
     "type": "git",
     "url": "https://github.com/switchlove/Pokeclicker-desktop.git"
@@ -9,13 +9,10 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron ./",
-    "dist:win32": "electron-builder --win --ia32 --publish never",
-    "dist:win64": "electron-builder --win --x64 --publish never",
-    "dist:winPort": "electron-builder --windows portable --publish never",
+    "dist:win": "electron-builder --win --x64 --publish never",
     "dist:tux": "electron-builder --linux --publish never",
-    "dist:mac": "electron-builder --macos --x64 --publish never",
-    "dist:mac:arm": "electron-builder --macos --arm64 --publish never",
-    "dist:mac:universal": "electron-builder --macos --universal --publish never",
+    "dist:mac": "electron-builder --macos --publish never",
+    "dist:mac:remote": "node build-mac.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
@@ -28,33 +25,35 @@
     "npm": ">=11.0.0"
   },
   "dependencies": {
-    "@xhayper/discord-rpc": "^1.3.4",
+    "@xhayper/discord-rpc": "^1.5.1",
     "adm-zip": "^0.6.1",
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.11"
   },
   "overrides": {
-    "undici": "^8.6.0"
+    "undici": "^8.12.4"
   },
   "devDependencies": {
-    "electron": "^43.0.0",
-    "electron-builder": "^26.15.3"
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0"
   },
   "build": {
-    "appId": "pokeclicker.desktop.acsrq.beta",
-    "productName": "PokeClicker ACSRQ Beta",
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "appId": "pokeclicker.desktop.acsrq",
+    "productName": "PokeClicker ACSRQ",
+    "artifactName": "PokeClicker-ACSRQ-${version}-${os}-${arch}.${ext}",
     "generateUpdatesFilesForAllChannels": true,
+    "files": [
+      "src/**/*"
+    ],
     "publish": [
       {
         "provider": "github",
         "owner": "switchlove",
         "repo": "Pokeclicker-desktop",
-        "channel": "beta",
-        "releaseType": "prerelease"
+        "channel": "latest",
+        "releaseType": "release"
       }
     ],
     "win": {
-      "requestedExecutionLevel": "highestAvailable",
       "target": "nsis"
     },
     "nsis": {
@@ -63,15 +62,12 @@
     },
     "mac": {
       "category": "public.app-category.games",
-      "hardenedRuntime": true,
+      "compression": "maximum",
       "icon": "./build/icon_512x512.icns",
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": "universal"
         }
       ]
     },

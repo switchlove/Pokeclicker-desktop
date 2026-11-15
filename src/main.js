@@ -13,11 +13,11 @@ const clientVersion = app.getVersion();
 
 const dataDir =  (electron.app || electron.remote.app).getPath('userData');
 
-const GAME_FOLDER = 'pokeclicker-new-wave';
+const GAME_FOLDER = 'pokeclicker-acsrq';
 const GAME_DOCS_INDEX = `${GAME_FOLDER}/docs/index.html`;
 const GAME_PACKAGE_JSON = `${GAME_FOLDER}/docs/package.json`;
-const DOWNLOAD_URL = 'https://codeload.github.com/switchlove/pokeclicker/zip/new-wave';
-const VERSION_CHECK_URL = 'https://raw.githubusercontent.com/switchlove/pokeclicker/new-wave/package.json';
+const DOWNLOAD_URL = 'https://codeload.github.com/switchlove/pokeclicker/zip/acsrq';
+const VERSION_CHECK_URL = 'https://raw.githubusercontent.com/switchlove/pokeclicker/acsrq/package.json';
 
 console.info('Data directory:', dataDir);
 

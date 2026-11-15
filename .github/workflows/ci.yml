@@ -27,9 +27,6 @@ jobs:
             build_name: macos
             build_command: npm run dist:mac
           - os: windows-latest
-            build_name: win32
-            build_command: npm run dist:win32
-          - os: windows-latest
             build_name: win64
             build_command: npm run dist:win64
 
