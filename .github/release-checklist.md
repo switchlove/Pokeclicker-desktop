@@ -33,7 +33,6 @@ Use stable releases for broad distribution.
 - [ ] `npm ci`
 - [ ] `npm run dist:tux`
 - [ ] `npm run dist:mac`
-- [ ] `npm run dist:win32`
-- [ ] `npm run dist:win64`
+- [ ] `npm run dist:win`
 - [ ] Review generated artifact names for consistency
 - [ ] Sanity-check the GitHub release notes before publishing

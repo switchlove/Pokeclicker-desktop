@@ -3,9 +3,12 @@
 Choose the installer that matches your platform:
 
 - **Windows 64-bit**: `.exe`
-- **Windows 32-bit**: `.exe`
-- **macOS**: `.dmg`
+- **macOS 13 or later**: `.dmg`
 - **Linux**: `.deb` or `.AppImage`
+
+32-bit Windows and macOS 12 are no longer supported (Electron 44+).
+
+On macOS the client does not update itself. Download new client versions from this page.
 
 ## Verification
 
